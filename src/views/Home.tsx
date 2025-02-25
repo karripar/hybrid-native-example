@@ -1,17 +1,22 @@
-import {View, Text, FlatList} from 'react-native';
+import {FlatList, Text, View} from 'react-native';
 import {useMedia} from '../hooks/apiHooks';
 import MediaListItem from '../components/MediaListItem';
+import {NavigationProp, ParamListBase} from '@react-navigation/native';
 
-const Home = () => {
+const Home = ({navigation}: {navigation: NavigationProp<ParamListBase>}) => {
   const {mediaArray} = useMedia();
+
+  console.log(mediaArray);
 
   return (
     <View>
-      <Text style={{color: "#fff"}}>Media Sharing App</Text>
+      <Text>My Media</Text>
       <FlatList
         data={mediaArray}
-        renderItem={({item}) => <MediaListItem item={item} />}
-      ></FlatList>
+        renderItem={({item}) => (
+          <MediaListItem item={item} navigation={navigation} />
+        )}
+      />
     </View>
   );
 };

@@ -1,26 +1,28 @@
 import {View, Text, Image, StyleSheet, TouchableOpacity} from 'react-native';
 import {MediaItemWithOwner} from 'hybrid-types/DBTypes';
+import { NavigationProp, ParamListBase } from '@react-navigation/native';
 
 type MediaItemProps = {
   item: MediaItemWithOwner;
+  navigation: NavigationProp<ParamListBase>;
 };
 
-const MediaListItem = (item: MediaItemProps) => {
+const MediaListItem = ({item, navigation}: MediaItemProps) => {
   return (
     <TouchableOpacity style={styles.listItem} onPress={() => {
-      console.log(item.item.title,' pressed');
+      navigation.navigate('Single', item);
     }}>
       <Image
         style={styles.img}
         source={{
           uri:
-            item.item.thumbnail ||
-            (item.item.screenshots ? item.item.screenshots[0] : ''),
+            item.thumbnail ||
+            (item.screenshots ? item.screenshots[0] : ''),
         }}
       />
       <View style={styles.desc}>
-        <Text style={styles.heading}>{item.item.title}</Text>
-        <Text>{ new Date(item.item.created_at).toLocaleDateString('fi-FI') }</Text>
+        <Text style={styles.heading}>{item.title}</Text>
+        <Text>{ new Date(item.created_at).toLocaleDateString('fi-FI') }</Text>
       </View>
     </TouchableOpacity>
   );

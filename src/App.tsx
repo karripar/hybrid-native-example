@@ -1,12 +1,13 @@
 import {StatusBar} from 'expo-status-bar';
-import {Platform, SafeAreaView, StyleSheet} from 'react-native';
-import Home from './views/Home';
+import {Platform, SafeAreaView, StyleSheet, Text} from 'react-native';
+import Navigator from './navigators/Navigator';
 
 const App = () => {
   console.log('App executed');
   return (
     <SafeAreaView style={styles.container}>
-      <Home></Home>
+      <Text>Hello</Text>
+      <Navigator />
       <StatusBar style="auto" />
     </SafeAreaView>
   );
@@ -15,14 +16,9 @@ const App = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: Platform.OS === 'android' ? 60 : 0,
-    backgroundColor: 'hotpink',
-    alignItems: 'center',
+    paddingTop: Platform.OS === 'android' ? 65 : 0,
+    backgroundColor: 'fff',
     justifyContent: 'center',
-  },
-  img: {
-    width: 400,
-    height: 400,
   },
 });
 
