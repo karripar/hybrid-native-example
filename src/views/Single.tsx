@@ -1,16 +1,22 @@
 import {MediaItemWithOwner} from 'hybrid-types/DBTypes';
-import {Image, Text, View} from 'react-native';
+import {Image, StyleSheet, Text, View} from 'react-native';
+import {Video} from 'expo-av';
 
-const Single = ({route}) => {
+const Single = ({route}: any) => {
   const item: MediaItemWithOwner = route.params;
   return (
     <View>
       <Text>{item.title}</Text>
-      <View style={{width: 300, height: 300}}>
-        <Image
-          style={{width: '100%', height: '100%'}}
-          source={{uri: item.filename}}
-        />
+      <View>
+        {item.media_type.includes('image') ? (
+          <Image style={styles.image} src={item.filename} />
+        ) : (
+          <Video
+            style={styles.image}
+            source={{uri: item.filename}}
+            useNativeControls
+          />
+        )}
       </View>
       <View>
         <Text>Owner: {item.username}</Text>
@@ -29,5 +35,12 @@ const Single = ({route}) => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  image: {
+    width: 300,
+    height: 300,
+  },
+});
 
 export default Single;
