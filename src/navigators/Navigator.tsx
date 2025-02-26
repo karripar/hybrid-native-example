@@ -5,6 +5,8 @@ import Profile from '../views/Profile';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Single from '../views/Single';
 import { House, User} from 'lucide-react-native';
+import { useUserContext } from '../hooks/ContextHooks';
+import Login from '../views/Login';
 
 
 const Tab = createBottomTabNavigator();
@@ -35,13 +37,14 @@ const TabScreen = () => {
 
 
 const StackScreen = () => {
+  const {user} = useUserContext();
   return (
     <Stack.Navigator>
-      <Stack.Screen
-        name="Tabs"
-        component={TabScreen}
-        options={{headerShown: false}}
-      />
+      {user ? (
+        <Stack.Screen name="Tabs" component={TabScreen} options={{headerShown: false}}/>
+      ) : (
+        <Stack.Screen name="Login" component={Login} />
+      )}
       <Stack.Screen name="Single" component={Single}/>
     </Stack.Navigator>
   );
