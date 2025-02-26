@@ -1,6 +1,7 @@
 import {View, Text, Image, StyleSheet, TouchableOpacity} from 'react-native';
 import {MediaItemWithOwner} from 'hybrid-types/DBTypes';
 import { NavigationProp, ParamListBase } from '@react-navigation/native';
+import { Card } from '@rneui/base';
 
 type MediaItemProps = {
   item: MediaItemWithOwner;
@@ -9,7 +10,8 @@ type MediaItemProps = {
 
 const MediaListItem = ({item, navigation}: MediaItemProps) => {
   return (
-    <TouchableOpacity style={styles.listItem} onPress={() => {
+    <Card>
+    <TouchableOpacity onPress={() => {
       navigation.navigate('Single', item);
     }}>
       <Image
@@ -25,17 +27,11 @@ const MediaListItem = ({item, navigation}: MediaItemProps) => {
         <Text>{ new Date(item.created_at).toLocaleDateString('fi-FI') }</Text>
       </View>
     </TouchableOpacity>
+    </Card>
   );
 };
 
 const styles = StyleSheet.create( {
-  listItem: {
-    padding: 10,
-    margin: 10,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 10,
-  },
-
   desc: {
     marginLeft: 10,
   },

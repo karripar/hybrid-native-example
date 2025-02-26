@@ -1,12 +1,11 @@
 import {StatusBar} from 'expo-status-bar';
-import {Platform, SafeAreaView, StyleSheet, Text} from 'react-native';
+import {Platform, SafeAreaView, StyleSheet} from 'react-native';
 import Navigator from './navigators/Navigator';
 
 const App = () => {
   console.log('App executed');
   return (
     <SafeAreaView style={styles.container}>
-      <Text>Hello</Text>
       <Navigator />
       <StatusBar style="auto" />
     </SafeAreaView>

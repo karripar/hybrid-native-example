@@ -4,6 +4,7 @@ import Home from '../views/Home';
 import Profile from '../views/Profile';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Single from '../views/Single';
+import { House, User} from 'lucide-react-native';
 
 
 const Tab = createBottomTabNavigator();
@@ -11,16 +12,27 @@ const Stack = createNativeStackNavigator();
 
 const TabScreen = () => {
   return (
-    <Tab.Navigator>
-      <Tab.Screen
-        name="My Media"
-        component={Home}
-        // options={{headerShown: false}}
-      />
-      <Tab.Screen name="My Profile" component={Profile}/>
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ color, size }) => {
+          let IconComponent;
+
+          if (route.name === 'All Media') {
+            IconComponent = House;
+          } else if (route.name === 'My Profile') {
+            IconComponent = User;
+          }
+
+          return IconComponent ? <IconComponent size={size} color={color} /> : null;
+        },
+      })}
+    >
+      <Tab.Screen name="All Media" component={Home} />
+      <Tab.Screen name="My Profile" component={Profile} />
     </Tab.Navigator>
   );
 };
+
 
 const StackScreen = () => {
   return (

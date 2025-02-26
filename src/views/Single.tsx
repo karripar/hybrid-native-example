@@ -1,12 +1,16 @@
 import {MediaItemWithOwner} from 'hybrid-types/DBTypes';
-import {Image, StyleSheet, Text, View} from 'react-native';
+import {Image, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {Video} from 'expo-av';
+import {Card, ListItem} from '@rneui/base';
+import {Calendar, File, User, AlignLeft} from 'lucide-react-native';
 
+// TODO: check route type
 const Single = ({route}: any) => {
   const item: MediaItemWithOwner = route.params;
   return (
-    <View>
-      <Text>{item.title}</Text>
+    <ScrollView>
+    <Card>
+      <Card.Title>{item.title}</Card.Title>
       <View>
         {item.media_type.includes('image') ? (
           <Image style={styles.image} src={item.filename} />
@@ -19,12 +23,24 @@ const Single = ({route}: any) => {
         )}
       </View>
       <View>
-        <Text>Owner: {item.username}</Text>
-        <Text>{item.description}</Text>
-        <Text>
-          Created at: {new Date(item.created_at).toLocaleString('fi-FI')}
-        </Text>
-        <Text>Filesize: {item.filesize}</Text>
+        <ListItem>
+          <Calendar size={30} color="black" />
+          <Text>
+            Created at: {new Date(item.created_at).toLocaleString('fi-FI')}
+          </Text>
+        </ListItem>
+        <ListItem>
+          <User size={30} color="black" />
+          <Text>Owner: {item.username}</Text>
+        </ListItem>
+        <ListItem>
+          <AlignLeft size={30} color="black" />
+          <Text>{item.description}</Text>
+        </ListItem>
+        <ListItem>
+          <File size={30} color="black" />
+          <Text>Filesize: {item.filesize}</Text>
+        </ListItem>
         <View></View>
       </View>
       <View>
@@ -32,7 +48,8 @@ const Single = ({route}: any) => {
           <Text>Comments</Text>
         </View>
       </View>
-    </View>
+    </Card>
+    </ScrollView>
   );
 };
 
