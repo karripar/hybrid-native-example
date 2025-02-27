@@ -24,7 +24,7 @@ const MediaListItem = ({item, navigation}: MediaItemProps) => {
       />
       <View style={styles.desc}>
         <Text style={styles.heading}>{item.title}</Text>
-        <Text>{ new Date(item.created_at).toLocaleDateString('fi-FI') }</Text>
+        <Text>{ new Date(item.created_at).toLocaleDateString('fi-FI') } by {item.username}</Text>
       </View>
     </TouchableOpacity>
     </Card>
