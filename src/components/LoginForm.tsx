@@ -63,7 +63,8 @@ const LoginForm: React.FC<RegisterFormProps> = ({ toggleRegister }) => {
         )}
         name="password"
       />
-      <Button title="Login" onPress={handleSubmit(doLogin)} />
+      <Button title="Login" onPress={handleSubmit(doLogin)} containerStyle={{marginBottom: 20}} />
+      <Button title="Or register?" onPress={toggleRegister} />
     </Card>
   );
 };

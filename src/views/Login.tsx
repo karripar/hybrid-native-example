@@ -1,13 +1,7 @@
 import {useState} from 'react';
 import LoginForm from '../components/LoginForm';
 import RegisterForm from '../components/RegisterForm';
-import { View } from 'react-native';
-
-interface RegisterFormProps {
-
-  toggleRegister: () => void;
-
-}
+import { ScrollView } from 'react-native';
 
 const Login = () => {
   // state for toggling between login and register form
@@ -18,13 +12,13 @@ const Login = () => {
   };
 
   return (
-    <View>
+    <ScrollView>
       {displayRegister ? (
         <RegisterForm toggleRegister={toggleRegister} />
       ) : (
         <LoginForm toggleRegister={toggleRegister} />
       )}
-    </View>
+    </ScrollView>
 
   );
 };

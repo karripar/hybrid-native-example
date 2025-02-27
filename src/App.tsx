@@ -1,17 +1,24 @@
 import {StatusBar} from 'expo-status-bar';
-import {Platform, SafeAreaView, StyleSheet} from 'react-native';
+import {Keyboard, Platform, SafeAreaView, StyleSheet} from 'react-native';
 import Navigator from './navigators/Navigator';
 import { UserProvider } from './contexts/UserContext';
+import { TouchableOpacity } from 'react-native';
 
 const App = () => {
   console.log('App executed');
   return (
+    <TouchableOpacity
+    activeOpacity={1}
+    style={{flex: 1}}
+    onPress={() => Keyboard.dismiss()}
+    >
     <SafeAreaView style={styles.container}>
       <UserProvider>
       <Navigator />
       </UserProvider>
       <StatusBar style="auto" />
     </SafeAreaView>
+    </TouchableOpacity>
   );
 };
 
