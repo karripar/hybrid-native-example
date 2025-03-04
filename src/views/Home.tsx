@@ -1,23 +1,44 @@
-import {FlatList, View} from 'react-native';
+import {FlatList, View, StyleSheet, useWindowDimensions} from 'react-native';
 import {useMedia} from '../hooks/apiHooks';
 import MediaListItem from '../components/MediaListItem';
-import {NavigationProp, ParamListBase} from '@react-navigation/native';
+import {useUpdateContext} from '../hooks/ContextHooks';
+import {useHeaderHeight} from '@react-navigation/elements';
+import {useBottomTabBarHeight} from '@react-navigation/bottom-tabs';
 
-const Home = ({navigation}: {navigation: NavigationProp<ParamListBase>}) => {
-  const {mediaArray} = useMedia();
+const Home = () => {
+  const {mediaArray, loading} = useMedia();
+  const {triggerUpdate} = useUpdateContext();
+  const {height} = useWindowDimensions();
+  const headerHeight = useHeaderHeight();
+  const bottomTabHeight = useBottomTabBarHeight();
 
-  console.log(mediaArray);
+  // Calculate available height for item (screen height minus navigation elements)
+  const itemHeight = height - headerHeight - bottomTabHeight;
+
+  const onRefresh = async () => {
+    triggerUpdate();
+  };
 
   return (
-    <View>
+    <View style={styles.container}>
       <FlatList
         data={mediaArray}
         renderItem={({item}) => (
-          <MediaListItem item={item} navigation={navigation} />
+          <MediaListItem item={item} itemHeight={itemHeight} />
         )}
+        onRefresh={onRefresh}
+        refreshing={loading}
+        pagingEnabled={true} // Enable paging for full-screen items
+        showsHorizontalScrollIndicator={false}
       />
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});
 
 export default Home;

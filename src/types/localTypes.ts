@@ -1,4 +1,8 @@
-import {MediaItemWithOwner, User, UserWithNoPassword} from 'hybrid-types/DBTypes';
+import {
+  MediaItemWithOwner,
+  User,
+  UserWithNoPassword,
+} from 'hybrid-types/DBTypes';
 
 export type Credentials = Pick<User, 'username' | 'password'>;
 export type RegisterCredentials = Pick<User, 'username' | 'password' | 'email'>;
@@ -21,4 +25,5 @@ export type NavigatorType = {
   Login: undefined;
   Single: {item: MediaItemWithOwner};
   'My Files': undefined;
+  Modal: {item: MediaItemWithOwner};
 }

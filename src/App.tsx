@@ -3,6 +3,7 @@ import {Keyboard, Platform, SafeAreaView, StyleSheet} from 'react-native';
 import Navigator from './navigators/Navigator';
 import { UserProvider } from './contexts/UserContext';
 import { TouchableOpacity } from 'react-native';
+import { UpdateProvider } from './contexts/UpdateContext';
 
 const App = () => {
   console.log('App executed');
@@ -14,7 +15,9 @@ const App = () => {
     >
     <SafeAreaView style={styles.container}>
       <UserProvider>
+      <UpdateProvider>
       <Navigator />
+      </UpdateProvider>
       </UserProvider>
       <StatusBar style="auto" />
     </SafeAreaView>

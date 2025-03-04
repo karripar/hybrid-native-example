@@ -1,10 +1,11 @@
 // UserContext.tsx
 import React, {createContext, useState} from 'react';
-import {UserWithNoPassword} from 'hybrid-types/DBTypes';
 import {useAuthentication, useUser} from '../hooks/apiHooks';
-import {AuthContextType, Credentials} from '../types/localTypes';
+import { AuthContextType, Credentials } from '../types/LocalTypes';
+import {UserWithNoPassword} from 'hybrid-types/DBTypes';
+import {UserResponse} from 'hybrid-types/MessageTypes';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Alert } from 'react-native';
+import {Alert} from 'react-native';
 
 const UserContext = createContext<AuthContextType | null>(null);
 
@@ -16,43 +17,49 @@ const UserProvider = ({children}: {children: React.ReactNode}) => {
   // login, logout and autologin functions are here instead of components
   const handleLogin = async (credentials: Credentials) => {
     try {
+      // post login credentials to API
       const loginResult = await postLogin(credentials);
-      console.log('doLogin result: ', loginResult);
+      console.log('doLogin result', loginResult);
+      // set token to Async storage
       if (loginResult) {
-        console.log('Login successful');
         await AsyncStorage.setItem('token', loginResult.token);
-        const userResponse = await getUserByToken(loginResult.token);
-        setUser(userResponse.user);
-      } else {
-        console.log('Login failed, check credentials');
       }
+      // set user to state
+      setUser(loginResult.user);
+      // TODO: navigate to home ??
+
     } catch (e) {
       console.log((e as Error).message);
-      Alert.alert('Login failed', (e as Error).message);
+      Alert.alert('Login failed!', (e as Error).message);
     }
   };
 
   const handleLogout = async () => {
     try {
+      // remove token from async storage
       await AsyncStorage.removeItem('token');
+      // ...or clear
+      // set user to null
       setUser(null);
+      // TODO: navigate to home ??
     } catch (e) {
       console.log((e as Error).message);
     }
   };
 
   // handleAutoLogin is used when the app is loaded to check if there is a valid token in local storage
-
   const handleAutoLogin = async () => {
     try {
-      const token = await AsyncStorage.getItem('token')
+      const token = await AsyncStorage.getItem('token');
+      // TODO: if token exists, get user data from API
       if (!token) {
         return;
       }
-      const userResponse = await getUserByToken(token as string);
+      const userResponse: UserResponse = await getUserByToken(token);
+      // set user to state
       setUser(userResponse.user);
     } catch (e) {
-      console.log('Auto login failed, user not found');
+      // alert('Token not valid');
       console.log((e as Error).message);
     }
   };

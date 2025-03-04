@@ -1,50 +1,86 @@
-import {View, Text, Image, StyleSheet, TouchableOpacity} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {MediaItemWithOwner} from 'hybrid-types/DBTypes';
-import { NavigationProp, ParamListBase } from '@react-navigation/native';
-import { Card } from '@rneui/base';
+import {
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import {NavigatorType} from '../types/localTypes';
+import Likes from './Likes';
 
 type MediaItemProps = {
   item: MediaItemWithOwner;
-  navigation: NavigationProp<ParamListBase>;
+  itemHeight: number;
 };
 
-const MediaListItem = ({item, navigation}: MediaItemProps) => {
+const MediaListItem = ({item, itemHeight}: MediaItemProps) => {
+  const navigation = useNavigation<NativeStackNavigationProp<NavigatorType>>();
+  const {width} = useWindowDimensions();
+
   return (
-    <Card>
-    <TouchableOpacity onPress={() => {
-      navigation.navigate('Single', item);
-    }}>
+    <TouchableOpacity
+      style={[styles.container, {height: itemHeight, width: width}]}
+      onPress={() => {
+        console.log(item.title + ' clicked');
+        navigation.navigate('Single', {item});
+      }}
+    >
       <Image
-        style={styles.img}
+        style={styles.image}
         source={{
-          uri:
-            item.thumbnail ||
-            (item.screenshots ? item.screenshots[0] : ''),
+          uri: item.thumbnail || undefined,
         }}
+        onError={(e) => console.log(e)}
       />
-      <View style={styles.desc}>
-        <Text style={styles.heading}>{item.title}</Text>
-        <Text>{ new Date(item.created_at).toLocaleDateString('fi-FI') } by {item.username}</Text>
+      <View style={styles.textContainer}>
+        <View>
+          <Text style={styles.title}>{item.title}</Text>
+          <Text style={styles.info}>
+            Uploaded: {new Date(item.created_at).toLocaleString('fi-FI')} by:{' '}
+            {item.username}
+          </Text>
+        </View>
+        <Likes item={item} />
       </View>
     </TouchableOpacity>
-    </Card>
   );
 };
 
-const styles = StyleSheet.create( {
-  desc: {
-    marginLeft: 10,
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#FFF',
+    padding: 0,
+    justifyContent: 'space-between',
   },
-
-  heading: {
+  image: {
+    flex: 1,
+    width: '100%',
+    resizeMode: 'cover',
+  },
+  textContainer: {
+    padding: 5,
+    position: 'absolute',
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  title: {
     fontSize: 18,
-    fontWeight: 'bold' as 'bold',
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color: '#FFF',
   },
-
-  img: {
-    width: 250,
-    height: 250,
-    borderRadius: 10,
+  info: {
+    fontSize: 11,
+    color: '#FFF',
   },
 });
 

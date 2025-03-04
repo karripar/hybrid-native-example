@@ -1,5 +1,6 @@
-import { Comment } from 'hybrid-types/DBTypes';
+import { Credentials, RegisterCredentials } from './../types/localTypes';
 import {
+  Comment,
   Like,
   MediaItem,
   MediaItemWithOwner,
@@ -7,7 +8,6 @@ import {
 } from 'hybrid-types/DBTypes';
 import {useEffect, useState} from 'react';
 import {fetchData} from '../lib/functions';
-import {Credentials, RegisterCredentials} from '../types/localTypes';
 import {
   AvailableResponse,
   LoginResponse,
@@ -16,18 +16,21 @@ import {
   UserResponse,
 } from 'hybrid-types/MessageTypes';
 import * as FileSystem from 'expo-file-system';
+import {useUpdateContext} from './ContextHooks';
 
 const useMedia = (id?: number) => {
   const [mediaArray, setMediaArray] = useState<MediaItemWithOwner[]>([]);
-
-  const url = id ? process.env.EXPO_PUBLIC_MEDIA_API + '/media/byuser/'+id : process.env.EXPO_PUBLIC_MEDIA_API + '/media';
-
+  const [loading, setLoading] = useState(false);
+  const {update} = useUpdateContext();
+  const url = id ? '/media/byuser/' + id : '/media';
   useEffect(() => {
     const getMedia = async () => {
+      console.log('getting media');
+      setLoading(true);
       try {
         // kaikki mediat ilman omistajan tietoja
         const media = await fetchData<MediaItem[]>(
-          url,
+          process.env.EXPO_PUBLIC_MEDIA_API + url,
         );
         // haetaan omistajat id:n perusteella
         const mediaWithOwner: MediaItemWithOwner[] = await Promise.all(
@@ -45,17 +48,17 @@ const useMedia = (id?: number) => {
         );
 
         mediaWithOwner.reverse();
-        console.log(mediaWithOwner);
 
         setMediaArray(mediaWithOwner);
       } catch (error) {
         console.error((error as Error).message);
+      } finally {
+        setLoading(false);
       }
     };
 
     getMedia();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [update, url]);
 
   const postMedia = async (
     file: UploadResponse,
@@ -91,17 +94,44 @@ const useMedia = (id?: number) => {
     );
   };
 
-  return {mediaArray, postMedia};
+  const deleteMedia = async (media_id: number, token: string) => {
+    // Send a DELETE request to /media/:media_id with the token in the Authorization header.
+    const options = {
+      method: 'DELETE',
+      headers: {
+        Authorization: 'Bearer ' + token,
+      },
+    };
+    return await fetchData<MessageResponse>(
+      process.env.EXPO_PUBLIC_MEDIA_API + '/media/' + media_id,
+      options,
+    );
+  };
+  return {mediaArray, postMedia, deleteMedia, loading};
 };
 
 const useFile = () => {
-  const [loading, setLoading] = useState(false);
+  const postFile = async (file: File, token: string) => {
+    // create FormData object
+    const formData = new FormData();
+    // add file to FormData
+    formData.append('file', file);
+    // upload the file to file server and get the file data, return the file data.
+    const options = {
+      method: 'POST',
+      headers: {Authorization: 'Bearer ' + token},
+      body: formData,
+    };
+    return await fetchData<UploadResponse>(
+      process.env.EXPO_PUBLIC_UPLOAD_API + '/upload',
+      options,
+    );
+  };
   const postExpoFile = async (
     imageUri: string,
     token: string,
   ): Promise<UploadResponse> => {
     // TODO: display loading indicator
-    setLoading(true);
     const fileResult = await FileSystem.uploadAsync(
       process.env.EXPO_PUBLIC_UPLOAD_API + '/upload',
       imageUri,
@@ -115,10 +145,13 @@ const useFile = () => {
       },
     );
     // TODO: hide loading indicator
-    setLoading(false);
-    return fileResult.body ? JSON.parse(fileResult.body) : null;
+    if (!fileResult.body) {
+      throw new Error("Upload failed: missing response body");
+    }
+    return JSON.parse(fileResult.body);
   };
-  return {postExpoFile, loading};
+
+  return {postFile, postExpoFile};
 };
 
 const useAuthentication = () => {
@@ -173,90 +206,70 @@ const useUser = () => {
     }
   };
 
-  const getUsernameAvailable = async (username: string) => {
-    try {
-      const result = await fetchData<AvailableResponse>(
-        process.env.EXPO_PUBLIC_AUTH_API + '/users/username/' + username,
-      );
-      return result;
-    } catch (error) {
-      throw new Error((error as Error).message);
-    }
+  const getUserNameAvailable = async (username: string) => {
+    return await fetchData<AvailableResponse>(
+      process.env.EXPO_PUBLIC_AUTH_API + '/users/username/' + username,
+    );
   };
 
   const getEmailAvailable = async (email: string) => {
-    try {
-      const result = await fetchData<AvailableResponse>(
-        process.env.EXPO_PUBLIC_AUTH_API + '/users/email/' + email,
-      );
-      return result;
-    } catch (error) {
-      throw new Error((error as Error).message);
-    }
+    return await fetchData<AvailableResponse>(
+      process.env.EXPO_PUBLIC_AUTH_API + '/users/email/' + email,
+    );
   };
 
-  const getUserByUserId = async (user_id: number) => {
-    try {
-      return await fetchData<UserWithNoPassword>(
-        process.env.EXPO_PUBLIC_AUTH_API + '/users/' + user_id,
-      );
-    } catch (error) {
-      throw new Error((error as Error).message);
-    }
+  const getUserById = async (id: number) => {
+    return await fetchData<UserWithNoPassword>(
+      process.env.EXPO_PUBLIC_AUTH_API + '/users/' + id,
+    );
   };
 
   return {
     getUserByToken,
     postRegister,
-    getUsernameAvailable,
+    getUserNameAvailable,
     getEmailAvailable,
-    getUserByUserId,
+    getUserById,
   };
 };
 
 const useComment = () => {
-  const {getUserByUserId} = useUser();
+  const {getUserById} = useUser();
 
   const postComment = async (
     comment_text: string,
     media_id: number,
     token: string,
   ) => {
-    try {
-      // TODO: Send a POST request to /comments with the comment object and the token in the Authorization header.
-      const options = {
-        method: 'POST',
-        headers: {
-          Authorization: 'Bearer ' + token,
-          'Content-type': 'application/json',
-        },
-        body: JSON.stringify({media_id, comment_text}),
-      };
-      return await fetchData<MessageResponse>(
-        process.env.EXPO_PUBLIC_MEDIA_API + '/comments',
-        options,
-      );
-    } catch (error) {
-      console.log((error as Error).message);
-    }
+    const options = {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + token,
+        'Content-type': 'application/json',
+      },
+      body: JSON.stringify({media_id, comment_text}),
+    };
+    return await fetchData<MessageResponse>(
+      process.env.EXPO_PUBLIC_MEDIA_API + '/comments',
+      options,
+    );
   };
 
   const getCommentsByMediaId = async (media_id: number) => {
-    // TODO: Send a GET request to /comments/bymedia/:media_id to get the comments.
-    try {
-      const comments = await fetchData<Comment[]>(
-        process.env.EXPO_PUBLIC_MEDIA_API + '/comments/bymedia/' + media_id,
-      );
-      const commentsWithUsernames = await Promise.all<Comment & {username: string}>(
-      comments.map(async (comment) => {
-        const user = await getUserByUserId(comment.user_id);
-        return {...comment, username: user.username};
-      }),
+    // Send a GET request to /comments/bymedia/:media_id to get the comments.
+    const comments = await fetchData<Comment[]>(
+      process.env.EXPO_PUBLIC_MEDIA_API + '/comments/bymedia/' + media_id,
     );
-    return commentsWithUsernames;
-    } catch (error) {
-      console.log((error as Error).message);
-    }
+    // Send a GET request to auth api and add username to all comments
+    return await Promise.all<
+          Comment & {username: string}
+        >(
+          comments.map(async (comment) => {
+            const user = await getUserById(comment.user_id);
+            return {...comment, username: user.username};
+          }),
+        );
+
   };
 
   return {postComment, getCommentsByMediaId};
@@ -264,70 +277,55 @@ const useComment = () => {
 
 const useLike = () => {
   const postLike = async (media_id: number, token: string) => {
-    try {
-      // TODO: Send a POST request to /likes with object { media_id } and the token in the Authorization header.
-      const options = {
-        method: 'POST',
-        headers: {
-          Authorization: 'Bearer ' + token,
-          'Content-type': 'application/json',
-        },
-        body: JSON.stringify({media_id: media_id}),
-      };
-      return await fetchData<MessageResponse>(
-        process.env.EXPO_PUBLIC_MEDIA_API + '/likes',
-        options,
-      );
-    } catch (error) {
-      console.log((error as Error).message);
-    }
+    // Send a POST request to /likes with object { media_id } and the token in the
+    // Authorization header.
+    const options = {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + token,
+        'Content-type': 'application/json',
+      },
+      body: JSON.stringify({media_id}),
+    };
+    return await fetchData<MessageResponse>(
+      process.env.EXPO_PUBLIC_MEDIA_API + '/likes',
+      options,
+    );
   };
 
   const deleteLike = async (like_id: number, token: string) => {
-    try {
-      // TODO: Send a DELETE request to /likes/:like_id with the token in the Authorization header.
-      const options = {
-        method: 'DELETE',
-        headers: {
-          Authorization: 'Bearer ' + token,
-        },
-      };
-      return await fetchData<MessageResponse>(
-        process.env.EXPO_PUBLIC_MEDIA_API + '/likes/' + like_id,
-        options,
-      );
-    } catch (error) {
-      console.log((error as Error).message);
-    }
+    // Send a DELETE request to /likes/:like_id with the token in the Authorization header.
+    const options = {
+      method: 'DELETE',
+      headers: {
+        Authorization: 'Bearer ' + token,
+      },
+    };
+    return await fetchData<MessageResponse>(
+      process.env.EXPO_PUBLIC_MEDIA_API + '/likes/' + like_id,
+      options,
+    );
   };
 
   const getCountByMediaId = async (media_id: number) => {
-    // TODO: Send a GET request to /likes/count/:media_id to get the number of likes.
-    try {
-      return await fetchData<{count: number}>(
-        process.env.EXPO_PUBLIC_MEDIA_API + '/likes/count/' + media_id,
-      );
-    } catch (error) {
-      console.log((error as Error).message);
-    }
+    // Send a GET request to /likes/count/:media_id to get the number of likes.
+    return await fetchData<{count: number}>(
+      process.env.EXPO_PUBLIC_MEDIA_API + '/likes/count/' + media_id,
+    );
   };
 
   const getUserLike = async (media_id: number, token: string) => {
-    // TODO: Send a GET request to /likes/bymedia/user/:media_id to get the user's like on the media
-    try {
-      const options = {
-        method: 'GET',
-        headers: {
-          Authorization: 'Bearer ' + token,
-        },
-      };
-      return await fetchData<Like>(
-        process.env.EXPO_PUBLIC_MEDIA_API + '/likes/bymedia/user/' + media_id,
-        options,
-      );
-    } catch (error) {
-      console.log((error as Error).message);
-    }
+    // Send a GET request to /likes/bymedia/user/:media_id to get the user's like on the media.
+    const options = {
+      method: 'GET',
+      headers: {
+        Authorization: 'Bearer ' + token,
+      },
+    };
+    return await fetchData<Like>(
+      process.env.EXPO_PUBLIC_MEDIA_API + '/likes/bymedia/user/' + media_id,
+      options,
+    );
   };
 
   return {postLike, deleteLike, getCountByMediaId, getUserLike};
