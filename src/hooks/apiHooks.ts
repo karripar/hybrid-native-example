@@ -15,6 +15,7 @@ import {
   UploadResponse,
   UserResponse,
 } from 'hybrid-types/MessageTypes';
+import * as FileSystem from 'expo-file-system';
 
 const useMedia = (id?: number) => {
   const [mediaArray, setMediaArray] = useState<MediaItemWithOwner[]>([]);
@@ -43,6 +44,7 @@ const useMedia = (id?: number) => {
           }),
         );
 
+        mediaWithOwner.reverse();
         console.log(mediaWithOwner);
 
         setMediaArray(mediaWithOwner);
@@ -52,6 +54,7 @@ const useMedia = (id?: number) => {
     };
 
     getMedia();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const postMedia = async (
@@ -92,23 +95,30 @@ const useMedia = (id?: number) => {
 };
 
 const useFile = () => {
-  const postFile = async (file: File, token: string) => {
-    // create FormData object
-    const formData = new FormData();
-    // add file to FormData
-    formData.append('file', file);
-    // upload the file to file server and get the file data, return the file data.
-    const options = {
-      method: 'POST',
-      headers: {Authorization: 'Bearer ' + token},
-      body: formData,
-    };
-    return await fetchData<UploadResponse>(
+  const [loading, setLoading] = useState(false);
+  const postExpoFile = async (
+    imageUri: string,
+    token: string,
+  ): Promise<UploadResponse> => {
+    // TODO: display loading indicator
+    setLoading(true);
+    const fileResult = await FileSystem.uploadAsync(
       process.env.EXPO_PUBLIC_UPLOAD_API + '/upload',
-      options,
+      imageUri,
+      {
+        httpMethod: 'POST',
+        uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+        fieldName: 'file',
+        headers: {
+          Authorization: 'Bearer ' + token,
+        },
+      },
     );
+    // TODO: hide loading indicator
+    setLoading(false);
+    return fileResult.body ? JSON.parse(fileResult.body) : null;
   };
-  return {postFile};
+  return {postExpoFile, loading};
 };
 
 const useAuthentication = () => {

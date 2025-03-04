@@ -4,6 +4,7 @@ import {Video} from 'expo-av';
 import {Card, ListItem} from '@rneui/base';
 import {Calendar, File, User, AlignLeft} from 'lucide-react-native';
 
+
 // TODO: check route type
 const Single = ({route}: any) => {
   const item: MediaItemWithOwner = route.params;
@@ -17,7 +18,7 @@ const Single = ({route}: any) => {
         ) : (
           <Video
             style={styles.image}
-            source={{uri: item?.thumbnail ?? item.filename}}
+            source={{uri: item?.filename || ''}}
             useNativeControls
           />
         )}
@@ -55,7 +56,6 @@ const Single = ({route}: any) => {
 
 const styles = StyleSheet.create({
   image: {
-    width: 300,
     height: 300,
   },
 });
