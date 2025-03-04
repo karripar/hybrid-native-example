@@ -17,7 +17,7 @@ const Single = ({route}: any) => {
         ) : (
           <Video
             style={styles.image}
-            source={{uri: item.filename}}
+            source={{uri: item?.thumbnail ?? item.filename}}
             useNativeControls
           />
         )}
