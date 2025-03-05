@@ -1,17 +1,25 @@
 import {MediaItemWithOwner} from 'hybrid-types/DBTypes';
-import {Alert,  ScrollView, StyleSheet, Text} from 'react-native';
+import {Alert, ScrollView, StyleSheet, Text} from 'react-native';
 import {Button, Card, ListItem} from '@rneui/base';
-import {Calendar, File, User, MessageCircle, ImageIcon} from 'lucide-react-native';
-import { NavigatorType } from '../types/localTypes';
-import { Link, RouteProp, useNavigation } from '@react-navigation/native';
+import {
+  Calendar,
+  File,
+  User,
+  MessageCircle,
+  ImageIcon,
+} from 'lucide-react-native';
+import {NavigatorType} from '../types/localTypes';
+import {Link, RouteProp, useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useMedia } from '../hooks/apiHooks';
-import { useUpdateContext, useUserContext } from '../hooks/ContextHooks';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useState } from 'react';
+import {useMedia} from '../hooks/apiHooks';
+import {useUpdateContext, useUserContext} from '../hooks/ContextHooks';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {useState} from 'react';
 import VideoPlayer from '../components/VideoPlayer';
 import Comments from '../components/Comments';
 import Likes from '../components/Likes';
+import React from 'react';
+import {Image} from '@rneui/base';
 
 type SingleProps = {
   route: RouteProp<NavigatorType, 'Single'>;
@@ -60,16 +68,18 @@ const Single = ({route}: SingleProps) => {
     }
   };
 
-
   return (
     <ScrollView>
       <Card>
         <Card.Title>{item.title}</Card.Title>
         <Card.Divider />
         {item.media_type.includes('image') ? (
-          <Link screen={'Modal'} params={{item}}>
-            <Card.Image style={styles.image} source={{uri: item.filename}} />
-          </Link>
+          <>
+            <Image source={{uri: item.filename}} style={styles.image} />
+            <Link screen={'Modal'} params={{item}}>
+              <Text>View Full Image</Text>
+            </Link>
+          </>
         ) : (
           <VideoPlayer videoFile={item.filename} style={styles.image} />
         )}
@@ -81,22 +91,30 @@ const Single = ({route}: SingleProps) => {
           </ListItem.Content>
         </ListItem>
         <ListItem>
-          <Text><Calendar size={20} color={'black'}></Calendar></Text>
+          <Text>
+            <Calendar size={20} color={'black'}></Calendar>
+          </Text>
           <Text>{new Date(item.created_at).toLocaleString('fi-FI')}</Text>
         </ListItem>
         <ListItem>
           <Text>{item.description}</Text>
         </ListItem>
         <ListItem>
-          <Text><ImageIcon size={20} color={'black'}></ImageIcon></Text>
+          <Text>
+            <ImageIcon size={20} color={'black'}></ImageIcon>
+          </Text>
           <Text>{item.media_type}</Text>
         </ListItem>
         <ListItem>
-          <Text><User size={20} color={'black'}/></Text>
+          <Text>
+            <User size={20} color={'black'} />
+          </Text>
           <Text>{item.username}</Text>
         </ListItem>
         <ListItem>
-          <Text><File size={20} color={'black'}></File></Text>
+          <Text>
+            <File size={20} color={'black'}></File>
+          </Text>
           <Text>{Math.round(item.filesize / 1024)} kB</Text>
         </ListItem>
 
@@ -104,7 +122,9 @@ const Single = ({route}: SingleProps) => {
           content={
             <>
               <ListItem.Content>
-                <Text><MessageCircle size={20} color={'black'}></MessageCircle></Text>
+                <Text>
+                  <MessageCircle size={20} color={'black'}></MessageCircle>
+                </Text>
               </ListItem.Content>
               <ListItem.Content>
                 <ListItem.Title>Comments</ListItem.Title>
@@ -136,7 +156,7 @@ const Single = ({route}: SingleProps) => {
 
 const styles = StyleSheet.create({
   image: {
-    height: 300,
+    height: 500,
   },
 });
 

@@ -26,8 +26,8 @@ const useMedia = (id?: number) => {
   useEffect(() => {
     const getMedia = async () => {
       console.log('getting media');
-      setLoading(true);
       try {
+        setLoading(true);
         // kaikki mediat ilman omistajan tietoja
         const media = await fetchData<MediaItem[]>(
           process.env.EXPO_PUBLIC_MEDIA_API + url,

@@ -10,6 +10,7 @@ import Login from '../views/Login';
 import MyFiles from '../views/MyFiles';
 import UploadForm from '../views/Uploads';
 import { NavigatorType } from '../types/localTypes';
+import React from 'react';
 import Modal from '../views/Modal';
 
 const Tab = createBottomTabNavigator<NavigatorType>();
